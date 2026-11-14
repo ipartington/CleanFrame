@@ -13,7 +13,7 @@
   var KEYS = { 37: 'left', 38: 'up', 39: 'right', 40: 'down', 13: 'ok', 27: 'back', 8: 'back', 10009: 'back', 461: 'back' };
   var FULL = 'Home holds nine apps. Remove one first.', LAST = 'Home needs one app';
 
-  /* home branch: UK defaults for a UE65NU7400; IDs read from the TV with `sdb shell 0 applist`.
+  /* home branch: UK defaults for a QE50Q80AATXXU (2021, Tizen 6.0); IDs read from the TV with `sdb shell 0 applist`.
      mark: true only where app/assets/icons/<id>.svg exists; others use a monogram plus the TV's own icon. */
   var PRIMARY_APPS = [
     /* input tile: shows an HDMI port in-app through FrameDevice.watchSource instead of launching an app. */
@@ -508,7 +508,7 @@
   }
 
   /* ---------- Navigation targets ---------- */
-  /* home branch: no Art Mode on a non-Frame TV (UE65NU7400). */
+  /* home branch: no Art Mode on a non-Frame TV (QE50Q80AATXXU). */
   function utils() { return ['apps', 'settings']; }
   /* prev/next run along the apps; out goes to the controls, inn comes back (or to a per-app action). */
   function axes() {
