@@ -23,7 +23,9 @@
     { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
     { id: 'iplayer', name: 'BBC iPlayer', mark: false, appId: 'DqEoaplKlw.bbchybrid' },
     { id: 'itvx', name: 'ITVX', mark: false, appId: 'OEvCiupaFR.ITVHub' },
-    { id: 'channel4', name: 'Channel 4', mark: false, appId: 'OCaxbgg9v6.chfourctv' }
+    { id: 'channel4', name: 'Channel 4', mark: false, appId: 'OCaxbgg9v6.chfourctv' },
+    /* input tile: selects an HDMI port through FrameDevice.setSource instead of launching an app. */
+    { id: 'sky', name: 'Sky', mark: false, input: 1 }
   ];
   var MARKS = ['netflix', 'disneyplus', 'primevideo', 'youtube', 'hbomax', 'spotify', 'tubi', 'stremio', 'appletv', 'abciview', 'sbs', 'applemusic'];
   var PRIMARY = PRIMARY_APPS.map(function (a) { return a.id; }), APPS = PRIMARY_APPS.slice(), ALPHA = [];
@@ -463,6 +465,7 @@
     if (!a || busy) return;
     if (S.c.home.indexOf(id) >= 0) { c = next(S.c.home.slice(), S.c.recent.slice()); c.lastApp = id; write(c, 'Last app'); }
     S.press = id; S.lastLaunch = a.name;
+    if (a.input) { perform(a.name, function (done) { FrameDevice.setSource(a.input, done); }); return; }
     perform(a.name, function (done) { FrameDevice.launchApp(a.appId, done); });
   }
   function refreshCatalog() {
@@ -485,6 +488,7 @@
         a.name = PRIMARY.indexOf(id) >= 0 ? PRIMARY_APPS[PRIMARY.indexOf(id)].name : String(entry.name).slice(0, 160);
         ALPHA.push(id);
       });
+      PRIMARY_APPS.forEach(function (a) { if (a.input && ALPHA.indexOf(a.id) < 0) ALPHA.push(a.id); });
       ALPHA.sort(function (a, b) { return app(a).name.toLowerCase().localeCompare(app(b).name.toLowerCase()); });
       catalog.loaded = true; catalog.error = null; catalog.revision++;
       if (top().id === 'apps' && oldFocus && ALPHA.indexOf(oldFocus) >= 0) top().f.i = ALPHA.indexOf(oldFocus);

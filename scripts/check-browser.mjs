@@ -4,7 +4,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { openPreview, root } from './browser.mjs';
 
 const KEY = 'cleanframe.home.v1';
-const PRIMARY = ['jellyfin', 'netflix', 'disneyplus', 'primevideo', 'youtube', 'iplayer', 'itvx', 'channel4'];
+const PRIMARY = ['jellyfin', 'netflix', 'disneyplus', 'primevideo', 'youtube', 'iplayer', 'itvx', 'channel4', 'sky'];
 const IDS = ['AprZAARz4r.Jellyfin', 'org.tizen.netflix-app', 'MCmYXNxgcu.DisneyPlus', 'org.tizen.primevideo', '9Ur5IzDKqV.TizenYouTube', 'DqEoaplKlw.bbchybrid', 'OEvCiupaFR.ITVHub', 'OCaxbgg9v6.chfourctv'];
 const NAMES = ['Jellyfin', 'Netflix', 'Disney+', 'Prime Video', 'YouTube', 'BBC iPlayer', 'ITVX', 'Channel 4'];
 const EXTRA = 'AbCdEf1234.FamilyApp', SPOTIFY = 'rJeHak5zRg.Spotify';
@@ -456,7 +456,7 @@ try {
   await run('Real catalogue and native launch boundary', async () => {
     await page(); await library();
     const names = await current.locator('[data-action^="apps.open."] .label').allTextContents();
-    check('Consumer catalogue excludes services, self and duplicate YouTube', names.length === 11 && names.filter(n => n === 'YouTube').length === 1 && !names.includes('CleanFrame') && !names.includes('Background worker'), names);
+    check('Consumer catalogue excludes services, self and duplicate YouTube', names.length === 12 && names.filter(n => n === 'YouTube').length === 1 && !names.includes('CleanFrame') && !names.includes('Background worker'), names);
     check('Installed names stay text, including HTML punctuation', names.includes(UNSAFE_NAME) && !(await current.evaluate(() => window.__catalogXss)));
     check('Exploration fixtures do not appear', !names.includes('Plex'));
     await act('apps.open.' + SPOTIFY); await current.waitForFunction(() => __tv.calls.length > 0);
@@ -464,6 +464,11 @@ try {
     await current.evaluate(() => window.dispatchEvent(new Event('focus')));
     await scene('home'); await act('home.app.netflix'); await current.waitForFunction(() => __tv.calls.length === 2);
     check('Primary app keeps verified target', (await current.evaluate(() => __tv.calls.at(-1))).id === IDS[1]);
+    await current.evaluate(() => { window.dispatchEvent(new Event('focus')); __tv.calls = []; });
+    await scene('home'); await act('home.app.sky'); await current.waitForFunction(() => __tv.calls.some(c => c.id === 'org.tizen.tv-viewer'));
+    check('Sky input tile selects HDMI 1 before viewer handoff', await current.evaluate(() => __tv.calls[0].method === 'setSource' && __tv.calls[0].number === 1 && __tv.calls[1].id === 'org.tizen.tv-viewer'));
+    check('Sky input tile is listed in All apps', names.includes('Sky'), names);
+    await current.evaluate(() => { __tv.calls = [{}, {}]; }); // keep the call counts the later upstream checks expect
     await current.evaluate(() => window.dispatchEvent(new Event('focus')));
     check('Art Mode utility is absent on the home branch', !(await current.locator('[data-action="util.art"]').count()));
     await group('samsung'); await act('samsung.home');
@@ -495,7 +500,7 @@ try {
     check('Catalogue failure leaves Home intact', same((await state()).dock, PRIMARY));
     await current.evaluate(() => { __tv.catalogFailure = false; }); await act('apps.retry');
     await current.waitForSelector('[data-action="apps.open.' + EXTRA + '"]');
-    check('Retry displays real installed names', (await current.locator('[data-action^="apps.open."]').count()) === 11);
+    check('Retry displays real installed names', (await current.locator('[data-action^="apps.open."]').count()) === 12);
   });
   await run('Native icon and failed-image fallback', async () => {
     await page({ catalog: CATALOG.map(a => a.id === EXTRA ? { ...a, iconPath: '/home/assets/icons/netflix.svg' } : a) });
