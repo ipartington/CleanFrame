@@ -633,3 +633,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .l-list .quiet-utils.is-text .u-content>*+*{margin-left:0;margin-right:0}
 .quiet-utils.is-text .u-content>*+*{margin-left:0}
 .l-list .quiet-utils.is-text .u .u-content>*+*{margin-right:0}
+
+/* home branch: input tile watching - let the TV window show through. */
+.is-watching,.is-watching body,.is-watching .stage{background:transparent!important}
+.is-watching .stage>*{visibility:hidden}

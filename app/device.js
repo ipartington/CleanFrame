@@ -95,6 +95,32 @@
       } catch (error) { finish(failure(error)); }
     });
   }
+  /* home branch: show an HDMI port in CleanFrame's own full-screen TV window.
+     On the Q80A (Tizen 6.0) handing off to org.tizen.tv-viewer re-selected the viewer's
+     last source (Samsung TV Plus) instead of the port chosen with setSource. */
+  function watchSource(port, done) {
+    var tvw = window.tizen && window.tizen.tvwindow;
+    if (!tvw || typeof tvw.show !== 'function' || typeof tvw.setSource !== 'function') { unavailable(done); return; }
+    var finish = bounded(done);
+    sources(function (err, list) {
+      if (err) { finish(err); return; }
+      var input = null;
+      list.some(function (item) { if (item.number === port) { input = item; return true; } return false; });
+      if (!input) { finish({ message: 'This HDMI input is not available.' }); return; }
+      try {
+        tvw.setSource(input.source, function () {
+          try {
+            tvw.show(function () { finish(null, input); }, function (error) { finish(failure(error)); },
+              ['0px', '0px', window.screen.width + 'px', window.screen.height + 'px'], 'MAIN');
+          } catch (error) { finish(failure(error)); }
+        }, function (error) { finish(failure(error)); });
+      } catch (error) { finish(failure(error)); }
+    });
+  }
+  function hideSource() {
+    var tvw = window.tizen && window.tizen.tvwindow;
+    try { if (tvw && typeof tvw.hide === 'function') tvw.hide(function () {}, function () {}, 'MAIN'); } catch (err) { /* Nothing to hide. */ }
+  }
   function launchApp(id, done) {
     if (!api()) { unavailable(done); return; }
     var finish = bounded(done);
@@ -138,5 +164,5 @@
       }, function (err) { finish(failure(err)); });
     } catch (err) { finish(failure(err)); }
   }
-  window.FrameDevice = { launch: launch, launchApp: launchApp, art: art, home: home, settings: settings, apps: apps, sources: sources, setSource: setSource, cancelSource: cancelSource };
+  window.FrameDevice = { launch: launch, launchApp: launchApp, art: art, home: home, settings: settings, apps: apps, sources: sources, setSource: setSource, cancelSource: cancelSource, watchSource: watchSource, hideSource: hideSource };
 }());

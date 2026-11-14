@@ -110,7 +110,9 @@ function installHarness({ seed, legacy, mock, catalog, minuteMs, catalogFailure,
       setSource(source, ok, fail) {
         __tv.calls.push({ method: 'setSource', number: source.number });
         setTimeout(() => { if (__tv.sourceFailure) fail({ name: 'SecurityError' }); else { __tv.currentInput = source.number; ok(source); } }, 0);
-      }
+      },
+      show(ok, fail, rect, type) { __tv.calls.push({ method: 'show', rect, type }); setTimeout(ok, 0); },
+      hide(ok, fail, type) { __tv.calls.push({ method: 'hide', type }); setTimeout(ok, 0); }
     };
   }
 }
@@ -465,8 +467,13 @@ try {
     await scene('home'); await act('home.app.netflix'); await current.waitForFunction(() => __tv.calls.length === 2);
     check('Primary app keeps verified target', (await current.evaluate(() => __tv.calls.at(-1))).id === IDS[1]);
     await current.evaluate(() => { window.dispatchEvent(new Event('focus')); __tv.calls = []; });
-    await scene('home'); await act('home.app.sky'); await current.waitForFunction(() => __tv.calls.some(c => c.id === 'org.tizen.tv-viewer'));
-    check('Sky input tile selects HDMI 1 before viewer handoff', await current.evaluate(() => __tv.calls[0].method === 'setSource' && __tv.calls[0].number === 1 && __tv.calls[1].id === 'org.tizen.tv-viewer'));
+    await scene('home'); await act('home.app.sky'); await current.waitForFunction(() => __tv.calls.some(c => c.method === 'show'));
+    check('Sky input tile selects HDMI 1 and shows it full-screen in-app', await current.evaluate(() => __tv.calls[0].method === 'setSource' && __tv.calls[0].number === 1 && __tv.calls[1].method === 'show' && __tv.calls[1].type === 'MAIN' && !__tv.calls.some(c => c.id === 'org.tizen.tv-viewer')));
+    check('Watching makes the page transparent', await current.evaluate(() => document.documentElement.classList.contains('is-watching')));
+    await current.keyboard.press('ArrowRight');
+    check('Watching ignores navigation keys', await current.evaluate(() => document.documentElement.classList.contains('is-watching')));
+    await current.keyboard.press('Escape'); await current.waitForFunction(() => __tv.calls.some(c => c.method === 'hide'));
+    check('Back hides the TV window and restores Home', await current.evaluate(() => !document.documentElement.classList.contains('is-watching') && ShoreQA.where().view === 'home'));
     check('Sky input tile is listed in All apps', names.includes('Sky'), names);
     await current.evaluate(() => { __tv.calls = [{}, {}]; }); // keep the call counts the later upstream checks expect
     await current.evaluate(() => window.dispatchEvent(new Event('focus')));

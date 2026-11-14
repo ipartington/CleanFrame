@@ -465,8 +465,19 @@
     if (!a || busy) return;
     if (S.c.home.indexOf(id) >= 0) { c = next(S.c.home.slice(), S.c.recent.slice()); c.lastApp = id; write(c, 'Last app'); }
     S.press = id; S.lastLaunch = a.name;
-    if (a.input) { perform(a.name, function (done) { FrameDevice.setSource(a.input, done); }); return; }
+    if (a.input) {
+      perform(a.name, function (done) { FrameDevice.watchSource(a.input, function (err) { if (!err) startWatching(); done(err); }); });
+      return;
+    }
     perform(a.name, function (done) { FrameDevice.launchApp(a.appId, done); });
+  }
+  /* home branch: an input tile shows its port full-screen behind a transparent page; Back returns. */
+  function startWatching() { S.watching = true; document.documentElement.className += ' is-watching'; }
+  function stopWatching() {
+    if (!S.watching) return;
+    S.watching = false; FrameDevice.hideSource();
+    document.documentElement.className = document.documentElement.className.replace(/\s*is-watching/g, '');
+    render();
   }
   function refreshCatalog() {
     var request, oldFocus;
@@ -1875,6 +1886,7 @@
     if (!k || ev.metaKey || ev.ctrlKey || ev.altKey) return;
     ev.preventDefault();
     if (k === 'ok' || k === 'back') { if (ev.repeat || heldKeys[code]) return; heldKeys[code] = true; }
+    if (S.watching) { if (k === 'back') stopWatching(); return; }
     press(k);
   });
   document.addEventListener('keyup', function (ev) { delete heldKeys[ev.keyCode]; });
@@ -1882,7 +1894,7 @@
   window.addEventListener('focus', function () { FrameDevice.cancelSource(); release(); refreshInputsOnReturn(); focusStage(); after(); updateClock(); });
   document.addEventListener('visibilitychange', function () {
     heldKeys = {};
-    if (document.hidden) { FrameDevice.cancelSource(); pauseRotation(); clearTimeout(clockTimer); }
+    if (document.hidden) { stopWatching(); FrameDevice.cancelSource(); pauseRotation(); clearTimeout(clockTimer); }
     else {
       release();
       if (S.c.bg === 'photo' && !S.pending && !S.previewBundle && (!committedBundle || S.bundleKey !== bundleKey(S.c))) setLook({}, { transient: true, startup: true });
