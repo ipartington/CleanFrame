@@ -16,16 +16,16 @@
   /* home branch: UK defaults for a UE65NU7400; IDs read from the TV with `sdb shell 0 applist`.
      mark: true only where app/assets/icons/<id>.svg exists; others use a monogram plus the TV's own icon. */
   var PRIMARY_APPS = [
-    { id: 'jellyfin', name: 'Jellyfin', mark: false, appId: 'AprZAARz4r.Jellyfin' },
+    /* input tile: shows an HDMI port in-app through FrameDevice.watchSource instead of launching an app. */
+    { id: 'sky', name: 'Sky', mark: false, input: 1 },
     { id: 'netflix', name: 'Netflix', mark: true, appId: 'org.tizen.netflix-app' },
-    { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'MCmYXNxgcu.DisneyPlus' },
     { id: 'primevideo', name: 'Prime Video', mark: true, appId: 'org.tizen.primevideo' },
+    { id: 'jellyfin', name: 'Jellyfin', mark: false, appId: 'AprZAARz4r.Jellyfin' },
+    { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'MCmYXNxgcu.DisneyPlus' },
     { id: 'youtube', name: 'YouTube', mark: true, appId: '9Ur5IzDKqV.TizenYouTube' },
     { id: 'iplayer', name: 'BBC iPlayer', mark: false, appId: 'DqEoaplKlw.bbchybrid' },
     { id: 'itvx', name: 'ITVX', mark: false, appId: 'OEvCiupaFR.ITVHub' },
-    { id: 'channel4', name: 'Channel 4', mark: false, appId: 'OCaxbgg9v6.chfourctv' },
-    /* input tile: selects an HDMI port through FrameDevice.setSource instead of launching an app. */
-    { id: 'sky', name: 'Sky', mark: false, input: 1 }
+    { id: 'channel4', name: 'Channel 4', mark: false, appId: 'OCaxbgg9v6.chfourctv' }
   ];
   var MARKS = ['netflix', 'disneyplus', 'primevideo', 'youtube', 'hbomax', 'spotify', 'tubi', 'stremio', 'appletv', 'abciview', 'sbs', 'applemusic'];
   var PRIMARY = PRIMARY_APPS.map(function (a) { return a.id; }), APPS = PRIMARY_APPS.slice(), ALPHA = [];

@@ -4,7 +4,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { openPreview, root } from './browser.mjs';
 
 const KEY = 'cleanframe.home.v1';
-const PRIMARY = ['jellyfin', 'netflix', 'disneyplus', 'primevideo', 'youtube', 'iplayer', 'itvx', 'channel4', 'sky'];
+const PRIMARY = ['sky', 'netflix', 'primevideo', 'jellyfin', 'disneyplus', 'youtube', 'iplayer', 'itvx', 'channel4'];
 const IDS = ['AprZAARz4r.Jellyfin', 'org.tizen.netflix-app', 'MCmYXNxgcu.DisneyPlus', 'org.tizen.primevideo', '9Ur5IzDKqV.TizenYouTube', 'DqEoaplKlw.bbchybrid', 'OEvCiupaFR.ITVHub', 'OCaxbgg9v6.chfourctv'];
 const NAMES = ['Jellyfin', 'Netflix', 'Disney+', 'Prime Video', 'YouTube', 'BBC iPlayer', 'ITVX', 'Channel 4'];
 const EXTRA = 'AbCdEf1234.FamilyApp', SPOTIFY = 'rJeHak5zRg.Spotify';
